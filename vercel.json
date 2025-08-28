@@ -14,5 +14,16 @@
       "src": "/(.*)",
       "dest": "frontend/build/$1"
     }
-  ]
+  ],
+  "env": {
+    "NODE_VERSION": "18"
+  },
+  "build": {
+    "env": {
+      "CI": "false"
+    },
+    "commands": {
+      "build": "npx react-scripts build"
+    }
+  }
 }
