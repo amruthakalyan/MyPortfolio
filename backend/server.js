@@ -46,8 +46,6 @@
 
 
 
-
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -59,25 +57,25 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-// CORS setup
-// Allow multiple origins from .env (comma separated) or fallback to localhost
-const allowedOrigins = process.env.FRONTEND_URL
-  ? process.env.FRONTEND_URL.split(',')
-  : ['http://localhost:3000', 'https://my-portfolio-chi-six-92.vercel.app'];
+// CORS setup: allow local dev and deployed frontend
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'http://localhost:3000', // local frontend
+  'https://my-portfolio-chi-six-92.vercel.app'         // deployed frontend
+];
 
 app.use(cors({
-  origin: function(origin, callback) {
+  origin: function(origin, callback){
     // allow requests with no origin (like Postman)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = `CORS policy does not allow access from the specified Origin: ${origin}`;
+    if (allowedOrigins.indexOf(origin) === -1){
+      const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
       return callback(new Error(msg), false);
     }
     return callback(null, true);
   }
 }));
 
-// Static folder for resume uploads
+// Serve static files (resume uploads)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
@@ -89,15 +87,16 @@ app.use('/api/projects', projectsRoute);
 app.use('/api/contact', contactRoute);
 app.use('/api/resume', resumeRoute);
 
+// Port
 const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB and start server
+// MongoDB connection
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
 .then(() => {
   console.log('MongoDB connected');
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  app.listen(PORT, () => console.log('Server running on port', PORT));
 })
 .catch(err => console.error('MongoDB connection error:', err));
