@@ -60,25 +60,25 @@ const app = express();
 app.use(express.json());
 
 // CORS setup
-const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:3000', // local dev
-  'https://my-portfolio-chi-six-92.vercel.app'          // deployed frontend
-];
+// Allow multiple origins from .env (comma separated) or fallback to localhost
+const allowedOrigins = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(',')
+  : ['http://localhost:3000', 'https://my-portfolio-chi-six-92.vercel.app'];
 
 app.use(cors({
-  origin: function(origin, callback){
+  origin: function(origin, callback) {
     // allow requests with no origin (like Postman)
-    if(!origin) return callback(null, true);
-    if(allowedOrigins.indexOf(origin) === -1){
-      const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = `CORS policy does not allow access from the specified Origin: ${origin}`;
       return callback(new Error(msg), false);
     }
     return callback(null, true);
   }
 }));
 
-// Static for resume upload
-app.use('/uploads', express.static(path.join(__dirname,'uploads')));
+// Static folder for resume uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 const projectsRoute = require('./routes/projects');
@@ -98,6 +98,6 @@ mongoose.connect(process.env.MONGO_URI, {
 })
 .then(() => {
   console.log('MongoDB connected');
-  app.listen(PORT, () => console.log('Server running on port', PORT));
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 })
 .catch(err => console.error('MongoDB connection error:', err));
